@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Registration & Login Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+   /* Main container with flexbox for alignment */
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  padding: 2rem;
+  position: relative;
+}
+
+/* Home page adjustments */
+#homePage {
+  text-align: center;
+  position: relative;
+  flex-grow: 1; /* Ensures this section takes the remaining space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: bottom;
+}
+
+/* Profile Icon adjustments */
+.profile-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 40px;
+  height: 40px;
+  background-color: #1976d2;
+  color: white;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+}
+
+/* Adjust title and other content */
+h1 {
+  margin-top: 50px;  /* Ensure space for profile icon */
+}
+
+/* Bottom-right position for the logout button */
+.bottom-right-buttons {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  z-index: 5; /* Ensure it's below the profile icon */
+}
+
+/* Ensure buttons are aligned correctly */
+button {
+  width: auto;
+  padding: 20px;
+  background-color: #ff4081;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+}
+
+    #loggedInInfo {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: 600;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Registration Form -->
+    <div id="registerPage" style="display: none;">
+      <h2>Register</h2>
+      <form id="registerForm">
+        <label for="regUsername">Username</label>
+        <input type="text" id="regUsername" required placeholder="Choose a username" />
+        <label for="regPassword">Password</label>
+        <input type="password" id="regPassword" required placeholder="Choose a password" />
+        <button type="submit">Register</button>
+      </form>
+      <p class="message" id="registerMessage"></p>
+      <a class="link" id="toLogin">Already have an account? Login here</a>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginPage" style="display: none;">
+      <h2>Login</h2>
+      <div class="top-right-buttons" id="loginTopButtons" style="display:none;">
+        <button id="logoutBtnLogin" title="Logout">Logout</button>
+        <button id="backToHomeBtnLogin" title="Back to Home Page">Home</button>
+      </div>
+      <div id="loggedInInfo"></div>
+      <form id="loginForm">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" required placeholder="Enter your username" />
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required placeholder="Enter your password" />
+        <button type="submit">Login</button>
+      </form>
+      <p class="message" id="loginMessage"></p>
+      <a class="link" id="toRegister">Don't have an account? Register here</a>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" style="display: none;">
+      <!-- Profile Icon -->
+      <div id="profileIcon" class="profile-icon" style="display: none;"></div>
+      <div class="bottom-right-buttons">
+        <button id="logoutBtnHome" title="Logout">Logout</button>
+      </div>
+      <h1>Welcome, <span id="userDisplay"></span>!</h1>
+      <p>You have successfully logged in.</p>
+      <button id="backToMainBtn" title="Back to Main Page">Main Page</button>
+    </div>
+
+  </div>
+
+  <script>
+    // Elements
+    const registerPage = document.getElementById('registerPage');
+    const loginPage = document.getElementById('loginPage');
+    const homePage = document.getElementById('homePage');
+
+    const registerForm = document.getElementById('registerForm');
+    const loginForm = document.getElementById('loginForm');
+
+    const registerMessage = document.getElementById('registerMessage');
+    const loginMessage = document.getElementById('loginMessage');
+
+    const toLoginLink = document.getElementById('toLogin');
+    const toRegisterLink = document.getElementById('toRegister');
+
+    const logoutBtnHome = document.getElementById('logoutBtnHome');
+    const backToMainBtn = document.getElementById('backToMainBtn');
+
+    const logoutBtnLogin = document.getElementById('logoutBtnLogin');
+    const backToHomeBtnLogin = document.getElementById('backToHomeBtnLogin');
+    const loginTopButtons = document.getElementById('loginTopButtons');
+    const loggedInInfo = document.getElementById('loggedInInfo');
+
+    const userDisplay = document.getElementById('userDisplay');
+    const profileIcon = document.getElementById('profileIcon');
+
+    // Show login page by default
+    function showLogin() {
+      registerPage.style.display = 'none';
+      homePage.style.display = 'none';
+      loginPage.style.display = 'block';
+      clearMessages();
+      loginForm.reset();
+      updateLoginPageForLoggedInUser();
+    }
+
+    // Show register page
+    function showRegister() {
+      loginPage.style.display = 'none';
+      homePage.style.display = 'none';
+      registerPage.style.display = 'block';
+      clearMessages();
+      registerForm.reset();
+    }
+
+    // Show home page
+    function showHome() {
+      loginPage.style.display = 'none';
+      registerPage.style.display = 'none';
+      homePage.style.display = 'block';
+      clearMessages();
+      updateHomePageUser();
+    }
+
+    // Clear messages
+    function clearMessages() {
+      registerMessage.textContent = '';
+      loginMessage.textContent = '';
+      registerMessage.style.color = 'red';
+      loginMessage.style.color = 'red';
+      loggedInInfo.textContent = '';
+      loginTopButtons.style.display = 'none';
+    }
+
+    // Check if user is logged in
+    function getLoggedInUser() {
+      return localStorage.getItem('loggedInUser ');
+    }
+    function isLoggedIn() {
+      return getLoggedInUser() !== null;
+    }
+
+    // Update home page user display
+    function updateHomePageUser() {
+      const user = getLoggedInUser();
+      userDisplay.textContent = user ? user : '';
+      const firstLetter = user ? user.charAt(0).toUpperCase() : '';
+      profileIcon.textContent = firstLetter;
+      profileIcon.style.display = 'flex';
+    }
+
+    // Update login page if user already logged in
+    function updateLoginPageForLoggedInUser() {
+      const user = getLoggedInUser();
+      if (user) {
+        loggedInInfo.textContent = `You are already logged in as "${user}".`;
+        loginTopButtons.style.display = 'flex';
+        loginForm.style.display = 'none';
+      } else {
+        loggedInInfo.textContent = '';
+        loginTopButtons.style.display = 'none';
+        loginForm.style.display = 'block';
+      }
+    }
+
+    // On page load, show home if logged in else login
+    window.onload = function () {
+      if (isLoggedIn()) {
+        showHome();
+      } else {
+        showLogin();
+      }
+    };
+
+    // Navigation links
+    toLoginLink.addEventListener('click', showLogin);
+    toRegisterLink.addEventListener('click', showRegister);
+
+    // Register form submit
+    registerForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const username = document.getElementById('regUsername').value.trim();
+      const password = document.getElementById('regPassword').value;
+
+      if (username === '' || password === '') {
+        registerMessage.style.color = 'red';
+        registerMessage.textContent = 'Please fill in all fields.';
+        return;
+      }
+
+      if (localStorage.getItem('user_' + username)) {
+        registerMessage.style.color = 'red';
+        registerMessage.textContent = 'Username already taken. Choose another.';
+        return;
+      }
+
+      localStorage.setItem('user_' + username, password);
+      registerMessage.style.color = 'green';
+      registerMessage.textContent = 'Registration successful! You can now login.';
+      registerForm.reset();
+    });
+
+    // Login form submit
+    loginForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      const storedPassword = localStorage.getItem('user_' + username);
+
+      if (storedPassword === null || storedPassword !== password) {
+        loginMessage.style.color = 'red';
+        loginMessage.textContent = 'Invalid username or password!';
+        return;
+      }
+
+      // Save logged in user
+      localStorage.setItem('loggedInUser ', username);
+
+      loginMessage.style.color = 'green';
+      loginMessage.textContent = 'Login successful! Redirecting...';
+
+      setTimeout(() => {
+        showHome();
+      }, 1000);
+    });
+
+    // Logout buttons
+    logoutBtnHome.addEventListener('click', function () {
+      localStorage.removeItem('loggedInUser ');
+      showLogin();
+    });
+    logoutBtnLogin.addEventListener('click', function () {
+      localStorage.removeItem('loggedInUser ');
+      showLogin();
+    });
+
+    // Back to Main Page button on home page
+    backToMainBtn.addEventListener('click', function () {
+      window.location.href = 'www.web.html'; // Update this with your main page link
+    });
+  </script>
+
+</body>
+</html>
